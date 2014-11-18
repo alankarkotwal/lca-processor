@@ -2,7 +2,6 @@
 `define _DECODE
 
 module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_out, Imm970);
-
 	output [15:0] PC_Imm, Sext_out, Imm970;
 	output rA1, rA2;
 	input [15:0] fromPipe1PC, fromPipe1IR;
@@ -15,9 +14,6 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_out, Imm970);
 	add add1(.in1(fromPipe1PC),.in2(offset),.out(PC_Imm));
 	sext6 s1(.in(IR[5:0]), .out(Sext_out));
 	Imm970 = {IR[8:0], 7'd0};
-	
-	
-
 endmodule
 
 `endif
