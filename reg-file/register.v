@@ -7,7 +7,7 @@ module register16(clk, out, in, write, reset);  // Negedge-triggered flipflop re
 	input      [15:0] in;
 	input      clk, write, reset;
 	
-	always@(negedge clk) begin
+	always@(posedge clk) begin
 		if(reset==0) begin
 			out = 16'b0;
 		end
