@@ -1,0 +1,3 @@
+iverilog lca_test.v
+./a.out
+gtkwave lca_test.vcd
