@@ -118,10 +118,6 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wCCR<=1;	//Let these kids rest in peace
 				MregWB<=3;	//Write back PC+1
 				break;
-			default:
-				rA2<= IR[8:6];	//RB
-				wA<= IR[5:3];	//RC
-				rA1<= IR[11:9];	//RA
 		end
 	end
 	
