@@ -21,8 +21,36 @@ module pipeline_reg2();
 endmodule
 
 
-module pipeline_reg3(	clk, reset, toCCR, toCCRWrite, toWriteRF, toImm970s, toPCImmInc, toALUOut, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect, toWriteMem, toRFOut, toRAOut,
-			CCR, CCRWrite, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut, RAOut);
+module pipeline_reg3(	clk, reset, toWriteRF, toImm970s, toPCImmInc, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect, toWriteMem, toRFOut, toRFOut2, toEqu, toSImm6, toIR,
+			WriteRF, Imm970s, PCImmInc, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut, RFOut2, Equ, SImm6, IR);
+	
+	output [15:0] Imm970s, PCImmInc, PCInc, RFOut, RFOut2, IR, SImm6;
+	output [ 2:0] WriteAdd, R7WriteSelect;
+	output [ 1:0] RegWriteSelect;
+	output        WriteRF, WriteR7, WriteMem, RAMemSelectInput, WAMemSelectInput, Equ;
+	
+	input [15:0] toImm970s, toPCImmInc, toPCInc, toRFOut, toRFOut2, toIR, toSImm6;
+	input [ 2:0] toWriteAdd, toR7WriteSelect;
+	input [ 1:0] toRegWriteSelect;
+	input        toWriteRF, toWriteR7, toWriteMem, toRAMemSelectInput, toWAMemSelectInput, toEqu, clk, reset;
+	
+	register16 Imm970Reg(.clk(clk), .out(Imm970s), .in(toImm970s), .write(1'b0), .reset(reset));
+	register16 PCImmIncReg(.clk(clk), .out(PCImmInc), .in(toPCImmInc), .write(1'b0), .reset(reset));
+	register16 PCIncReg(.clk(clk), .out(PCInc), .in(toPCInc), .write(1'b0), .reset(reset));
+	register16 RFOutReg(.clk(clk), .out(RFOut), .in(toRFOut), .write(1'b0), .reset(reset));
+	register16 RFOut2Reg(.clk(clk), .out(RFOut2), .in(toRFOut2), .write(1'b0), .reset(reset));
+	register16 SImm6Reg(.clk(clk), .out(SImm6), .in(toSImm6), .write(1'b0), .reset(reset));
+	register16 IRReg(.clk(clk), .out(IR), .in(toIR), .write(1'b0), .reset(reset));
+	register3  WriteAddReg(.clk(clk), .out(WriteAdd), .in(toWriteAdd), .write(1'b0), .reset(reset));
+	register3  R7WriteSelectReg(.clk(clk), .out(R7WriteSelect), .in(toR7WriteSelect), .write(1'b0), .reset(reset));
+	register2  RegWriteSelectReg(.clk(clk), .out(RegWriteSelect), .in(toRegWriteSelect), .write(1'b0), .reset(reset));
+	register1  WriteRFReg(.clk(clk), .out(WriteRF), .in(toWriteRF), .write(1'b0), .reset(reset));
+	register1  WriteR7Reg(.clk(clk), .out(WriteR7), .in(toWriteR7), .write(1'b0), .reset(reset));
+	register1  WriteMemReg(.clk(clk), .out(WriteMem), .in(toWriteMem), .write(1'b0), .reset(reset));
+	register1  RAMemSelect(.clk(clk), .out(RAMemSelectInput), .in(toRAMemSelectInput), .write(1'b0), .reset(reset));
+	register1  WAMemSelect(.clk(clk), .out(WAMemSelectInput), .in(toWAMemSelectInput), .write(1'b0), .reset(reset));
+	register1  EquReg(.clk(clk), .out(Equ), .in(toEqu), .write(1'b0), .reset(reset));
+
 
 endmodule
 
