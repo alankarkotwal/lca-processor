@@ -1,10 +1,11 @@
 `ifndef _DECODE
 `define _DECODE
+`include "../misc/sext.v"
 
-module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, wRF, alu_ctrl);
+module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
 	output [15:0] PC_Imm, Sext_Imm6, Imm970;
 	output [2:0] rA1, rA2, wA;
-	output Mex1, Mex2, wCCR, wMem, wRF, alu_ctrl;
+	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB;
 	input [15:0] fromPipe1PC, fromPipe1IR;
 	reg [15:0] imm6, imm9;
 	reg select, offset;
