@@ -1,10 +1,10 @@
 `ifndef _DECODE
 `define _DECODE
 
-module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, wRF);
+module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, wRF, alu_ctrl);
 	output [15:0] PC_Imm, Sext_Imm6, Imm970;
 	output [2:0] rA1, rA2, wA;
-	output Mex1, Mex2, wCCR, wMem, wRF;
+	output Mex1, Mex2, wCCR, wMem, wRF, alu_ctrl;
 	input [15:0] fromPipe1PC, fromPipe1IR;
 	reg [15:0] imm6, imm9;
 	reg select, offset;
@@ -28,6 +28,8 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex2<= 0;	//Rfout2
 				wCCR<= 0;	//Write CCR
 				wMem<=1;	// No memory write
+				alu_ctrl<=0;	//Add operation
+				MregWB<=1;	//Write back Aluout
 /*				wR7<=1;	//R7 not being written
 				case(IR[1:0])
 				begin
@@ -48,14 +50,35 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex2<= 1;	//Sext_Imm6;
 				wCCR<= 0;	//Write CCR
 				wMem<=1;	// No memory write
-				
+				alu_ctrl<=0;	//ADD
+				MregWB<=1; 	//Write back Alu_out
+				break;
+			0010:	//NDU, NDC, NDZ
+				rA2<= IR[8:6];	//RB
+				wA<= IR[5:3];	//RC
+				rA1<= IR[11:9];	//RA
+				Mex1<= 0;	//Rfout1
+				Mex2<= 0;	//Rfout2
+				wCCR<= 0;	//Write CCR
+				wMem<=1;	// No memory write
+				alu_ctrl<=1;	//Nand operation
+				MregWB<=1;	//Write back Alu_out
 				break;
 			0011:	//LHI
-				wA<= IR[11:9];
-				
+				wA<= IR[11:9];	//RA
+				wCCR<=1;	
+				wMem<=1;	//No memory write
 				break;
 			0100:	//LW
-				wA<= IR[11:9];
+				wA<= IR[11:9];	//RA
+				rA2<=IR[8:6];	//RB
+				Mex1<=1;	//Sign Extended Immediate six bit
+				Mex2<=0;	//Rfout2
+				wCCR<=1;	//CCR not written
+				wMem<=1;	//No memory write
+				alu_ctrl<=1;	//ADD
+				MmemR<=1;	//Read from memory using address in Alu_out
+				
 				break;
 			0101:	//SW
 				rA2<= IR[8:6];
