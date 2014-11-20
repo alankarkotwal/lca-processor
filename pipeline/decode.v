@@ -98,15 +98,25 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				rA1<= IR[11:9];
 				break;
 			1100:	//BEQ
-				rA1<= IR[11:9];
-				rA2<= IR[8:6];
+				rA1<= IR[11:9];	//RA
+				rA2<= IR[8:6];	//RB
+				wMem<=1;	//No memory write
+				wCCR<=1;	//No disturbance to CCR
+				Mr7WB<=2;	//PC_Imm -> r7
 				break;
 			1000:	//JAL
-				wA<= IR[11:9];
+				wA<= IR[11:9];	//RA
+				wMem<=1;	//Don't disturb your memory
+				wCCR<=1;	//Let these kids rest in peace
+				MregWB<=3;	//Write back PC+1
+				Mr7WB<=2;	//PC_Imm -> r7
 				break;
 			1001:	//JLR
-				rA2<= IR[8:6];
-				wA<= IR[11:9];
+				rA2<= IR[8:6];	//RB
+				wA<= IR[11:9];	//RA
+				wMem<=1;	//Don't disturb your memory
+				wCCR<=1;	//Let these kids rest in peace
+				MregWB<=3;	//Write back PC+1
 				break;
 			default:
 				rA2<= IR[8:6];	//RB
