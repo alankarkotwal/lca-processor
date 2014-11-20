@@ -1,0 +1,3 @@
+# iVerilog outputs
+*.out
+*.vcd
