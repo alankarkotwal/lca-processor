@@ -21,7 +21,8 @@ module pipeline_reg2();
 endmodule
 
 
-module pipeline_reg3();
+module pipeline_reg3(	clk, reset, toCCR, toCCRWrite, toWriteRF, toImm970s, toPCImmInc, toALUOut, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect, toWriteMem, toRFOut, toRAOut,
+			CCR, CCRWrite, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut, RAOut);
 
 endmodule
 
