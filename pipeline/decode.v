@@ -68,21 +68,28 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wA<= IR[11:9];	//RA
 				wCCR<=1;	
 				wMem<=1;	//No memory write
+				MregWB<=1;	//Write back alu_out
 				break;
 			0100:	//LW
 				wA<= IR[11:9];	//RA
 				rA2<=IR[8:6];	//RB
 				Mex1<=1;	//Sign Extended Immediate six bit
 				Mex2<=0;	//Rfout2
-				wCCR<=1;	//CCR not written
+				wCCR<=0;	//Zero flag is set by this instruction
 				wMem<=1;	//No memory write
-				alu_ctrl<=1;	//ADD
+				alu_ctrl<=0;	//ADD
 				MmemR<=1;	//Read from memory using address in Alu_out
-				
+				MregWB<=0;	//Write back mem_data
 				break;
 			0101:	//SW
-				rA2<= IR[8:6];
-				rA1<= IR[11:9];
+				rA2<= IR[8:6];	//RB
+				rA1<= IR[11:9];	//RA
+				Mex1<=1;	//Sign Extended Immediate six bit
+				Mex2<=0;	//Rfout2
+				wCCR<=1;
+				wMem<=0;	// Write to memory
+				alu_ctrl<=0;	//Add
+				MmemW<=1;	//Write to memory. data prsesnt in Alu_out
 				break;
 			0110:	//LM
 				rA1<= IR[11:9];
