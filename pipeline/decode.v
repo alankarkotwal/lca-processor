@@ -178,23 +178,23 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 			4'b0111:	//SM
 			begin
 				rA1<= IR[11:9];	//RA
-				rA2<= 3'b000;	//Don't Care
+				wA<= 3'b000;	//Don't Care
 				if(LM_Imm[0]==1)
-					wA <=3'b000;
+					rA2 <=3'b000;
 				else if(LM_Imm[1]==1)
-					wA <=3'b001;
+					rA2 <=3'b001;
 				else if(LM_Imm[2]==1)
-					wA <=3'b010;
+					rA2 <=3'b010;
 				else if(LM_Imm[3]==1)
-					wA <=3'b011;
+					rA2 <=3'b011;
 				else if(LM_Imm[4]==1)
-					wA <=3'b100;
+					rA2 <=3'b100;
 				else if(LM_Imm[5]==1)
-					wA <=3'b101;
+					rA2 <=3'b101;
 				else if(LM_Imm[6]==1)
-					wA <=3'b110;
+					rA2 <=3'b110;
 				else if(LM_Imm[7]==1)
-					wA <=3'b111;
+					rA2 <=3'b111;
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
 				alu_ctrl<=0;	//Don't Care
