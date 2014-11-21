@@ -3,7 +3,7 @@
 `include "../misc/sext.v"
 
 module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
-	output [15:0] PC_Imm, Sext_Imm6, Imm970;
+	output [15:0] PC_Imm, Sext_Imm6, Imm970, pipe2IR;
 	output [2:0] rA1, rA2, wA, i, MregWB;
 	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MmemR, MmemW;
 	output [3:0] Mr7WB;
@@ -22,6 +22,7 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 	
 	always@(*)	
 	begin
+	pipe2IR<=IR[15:0];
 		case (IR[15:12])
 		begin
 			0000:	//ADD, ADC, ADZ
@@ -141,6 +142,7 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 						7:	wA<=3'b111;	//R7
 						break;
 					}
+					pipe2IR[11:9]<=wA;
 				}
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
