@@ -39,6 +39,7 @@ begin
 			else	
 							F3 = 2'b0;
 		end
+		
 else 
 F3 = 2'b0;
 end
