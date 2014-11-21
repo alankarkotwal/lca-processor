@@ -4,11 +4,13 @@
 
 module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
 	output [15:0] PC_Imm, Sext_Imm6, Imm970;
-	output [2:0] rA1, rA2, wA;
+	output [2:0] rA1, rA2, wA, i;
 	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB;
 	input [15:0] fromPipe1PC, fromPipe1IR;
 	reg [15:0] imm6, imm9;
 	reg select, offset;
+	reg [8:0] LM_Imm;	//Only for LM & SM instruction
+	assign LM_Imm = IR[8:0];
 	assign imm6 = {10'd0, IR[5:0]};
 	assign imm9 = {7'd0, IR[8:0]};
 	assign select = (IR[15:12]==4'B1000)?0:1;	//If opcode is 1000 then select data0.
@@ -90,13 +92,54 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wCCR<=1;
 				wMem<=0;	// Write to memory
 				alu_ctrl<=0;	//Add
-				MmemW<=1;	//Write to memory. data prsesnt in Alu_out
+				MmemW<=1;	//Write to memory. address in Alu_out
+				MmemData<=2;	//Write to memonry. Data present in rfout1
 				break;
 			0110:	//LM
-				rA1<= IR[11:9];
+				rA1<= IR[11:9];	//RA
+				for(i=0;i<8;i++)
+				{
+					if(LM_Imm[i]==1)
+					{
+						case (i)
+						0:	wA<=3'b000; break;	//R0
+						1:	wA<=3'b001; break;	//R1
+						2:	wA<=3'b010; break;	//R2
+						3:	wA<=3'b011; break;	//R3
+						4:	wA<=3'b100; break;	//R4
+						5:	wA<=3'b101; break;	//R5
+						6:	wA<=3'b110; break;	//R6
+						7:	wA<=3'b111;	//R7
+						break;
+					}
+				}
+				wCCR<=1;	//No disturbance to CCR
+				wMem<=1;	//No memory write operation
+				MmemR<=0;	//Read from memory using address stored in RA
+				MregWB<=0;	//Write back the value in mem_data
 				break;
 			0111:	//SM
-				rA1<= IR[11:9];
+				rA1<= IR[11:9];	//RA
+				for(i=0;i<8;i++)
+				{
+					if(LM_Imm[i]==1)
+					{
+						case (i)
+						0:	rA2<=3'b000; break;	//R0
+						1:	rA2<=3'b001; break;	//R1
+						2:	rA2<=3'b010; break;	//R2
+						3:	rA2<=3'b011; break;	//R3
+						4:	rA2<=3'b100; break;	//R4
+						5:	rA2<=3'b101; break;	//R5
+						6:	rA2<=3'b110; break;	//R6
+						7:	rA2<=3'b111;	//R7
+						break;
+					}
+				}
+				wCCR<=1;	//CCR write not to be done
+				wMem<=1;	//Write memory operation done
+				MmemW<=0;	//Write to memory. address in RA
+				MmemData<=3;	//Write to memory. data in Rfout2
 				break;
 			1100:	//BEQ
 				rA1<= IR[11:9];	//RA
