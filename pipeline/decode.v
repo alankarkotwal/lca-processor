@@ -1,37 +1,42 @@
-`ifndef _DECODE
-`define _DECODE
-`include "../misc/sext.v"
 
-module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
-	output [15:0] PC_Imm, Sext_Imm6, Imm970, pipe2IR;
-	output [2:0] rA1, rA2, wA, i, MregWB;
-	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MmemR, MmemW;
-	output [3:0] Mr7WB;
-	input [15:0] fromPipe1PC, fromPipe1IR;
-	reg [15:0] imm6, imm9;
-	reg select, offset;
-	reg [8:0] LM_Imm;	//Only for LM & SM instruction
+
+
+
+
+module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB, pipe2IR);
+	output  [15:0] PC_Imm, Sext_Imm6, Imm970;
+	output reg [15:0]pipe2IR;
+	output reg [2:0] rA1, rA2, wA, MregWB;
+	output reg MmemData;
+	integer i;
+	output reg  Mex1, Mex2, wMem, alu_ctrl, MmemR, MmemW;
+	output reg [3:0] Mr7WB;
+	input [15:0] fromPipe1PC, IR;//from pipe1
+	wire [15:0] imm6, imm9;
+	wire select, offset;
+	wire [8:0] LM_Imm;	//Only for LM & SM instruction
 	assign LM_Imm = IR[8:0];
 	assign imm6 = {10'd0, IR[5:0]};
 	assign imm9 = {7'd0, IR[8:0]};
-	assign select = (IR[15:12]==4'B1000)?0:1;	//If opcode is 1000 then select data0.
+	assign select = (IR[15:12]==4'B1000)?1'b0:1'b1;	//If opcode is 1000 then select data0.
 	mux16x2 m1(.data0(imm9), .data1(imm6), .selectInput(select), .out(offset));
 	add add1(.in1(fromPipe1PC),.in2(offset),.out(PC_Imm));
 	sext6 s1(.in(IR[5:0]), .out(Sext_Imm6));
-	Imm970 = {IR[8:0], 7'd0};
+	assign Imm970 = {IR[8:0], 7'd0};
 	
 	always@(*)	
 	begin
 	pipe2IR<=IR[15:0];
 		case (IR[15:12])
-		begin
-			0000:	//ADD, ADC, ADZ
+		
+			4'b0000:	//ADD, ADC, ADZ
+				begin
 				rA2<= IR[8:6];	//RB
 				wA<= IR[5:3];	//RC
 				rA1<= IR[11:9];	//RA
 				Mex1<= 0;	//Rfout1
 				Mex2<= 0;	//Rfout2
-				wCCR<= 0;	//Write CCR
+		
 				alu_ctrl<=0;	//Add operation
 				wMem<=1;	// No memory write
 				MmemR<=0;	//Don't Care
@@ -42,13 +47,14 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0001:	//ADI
+				end
+			4'b0001:	//ADI
+				begin
 				rA1<= IR[11:9];	//RA
 				wA<= IR[8:6];	//RB
 				Mex1<= 0;	//Rfout1
 				Mex2<= 1;	//Sext_Imm6;
-				wCCR<= 0;	//Write CCR
+				
 				alu_ctrl<=0;	//ADD
 				wMem<=1;	// No memory write
 				MmemR<=0;	//Don't Care
@@ -59,14 +65,16 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0010:	//NDU, NDC, NDZ
+				
+				end
+			4'b0010:	//NDU, NDC, NDZ
+				begin
 				rA2<= IR[8:6];	//RB
 				wA<= IR[5:3];	//RC
 				rA1<= IR[11:9];	//RA
 				Mex1<= 0;	//Rfout1
 				Mex2<= 0;	//Rfout2
-				wCCR<= 0;	//Write CCR
+				
 				alu_ctrl<=1;	//Nand operation
 				wMem<=1;	// No memory write
 				MmemR<=0;	//Don't Care
@@ -77,12 +85,14 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0011:	//LHI
+				
+				end
+			4'b0011:	//LHI
+				begin
 				wA<= IR[11:9];	//RA
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't care
-				wCCR<=1;	//CCR write not required
+				
 				alu_ctrl<=0;	//Don't care
 				wMem<=1;	//No memory write
 				MmemR<=0;	//Don't Care
@@ -93,13 +103,15 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=0;	// Write back Imm970 to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0100:	//LW
+			
+				end
+			4'b0100:	//LW
+			begin
 				wA<= IR[11:9];	//RA
 				rA2<=IR[8:6];	//RB
 				Mex1<=1;	//Sign Extended Immediate six bit
 				Mex2<=0;	//Rfout2
-				wCCR<=0;	//Zero flag is set by this instruction
+				
 				alu_ctrl<=0;	//ADD
 				wMem<=1;	//No memory write
 				MmemR<=1;	//Read from memory using address in Alu_out
@@ -110,13 +122,15 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=1;	// Write back mem_data to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0101:	//SW
+				
+				end
+			4'b0101:	//SW
+			begin
 				rA2<= IR[8:6];	//RB
 				rA1<= IR[11:9];	//RA
 				Mex1<=1;	//Sign Extended Immediate six bit
 				Mex2<=0;	//Rfout2
-				wCCR<=1;
+				
 				alu_ctrl<=0;	//Add
 				wMem<=0;	// Write to memory
 				MmemR<=0;	//Don't Care
@@ -124,29 +138,33 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				MmemData<=0;	//Write to memory. Data present in rfout1
 				MregWB<=0;	//Don't Care
 				Mr7WB<=0;	//Don't Care
-				break;
-			0110:	//LM
+				
+			end
+			4'b0110:	//LM
+			begin
 				rA1<= IR[11:9];	//RA
-				for(i=0;i<8;i++)
-				{
-					if(LM_Imm[i]==1)
-					{
-						case (i)
-						0:	wA<=3'b000; break;	//R0
-						1:	wA<=3'b001; break;	//R1
-						2:	wA<=3'b010; break;	//R2
-						3:	wA<=3'b011; break;	//R3
-						4:	wA<=3'b100; break;	//R4
-						5:	wA<=3'b101; break;	//R5
-						6:	wA<=3'b110; break;	//R6
-						7:	wA<=3'b111;	//R7
-						break;
-					}
+				
+				if(LM_Imm[0]==1)
+					wA <=3'b000;
+				else if(LM_Imm[1]==1)
+					wA <=3'b001;
+				else if(LM_Imm[2]==1)
+				wA <=3'b010;
+				else if(LM_Imm[3]==1)
+				wA <=3'b011;
+					else if(LM_Imm[4]==1)
+				wA <=3'b100;
+					else if(LM_Imm[5]==1)
+				wA <=3'b101;
+					else if(LM_Imm[6]==1)
+				wA <=3'b110;
+					else if(LM_Imm[7]==1)
+				wA <=3'b111;
 					pipe2IR[11:9]<=wA;
-				}
+				
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
-				wCCR<=1;	//No disturbance to CCR
+			
 				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//No memory write operation
 				MmemR<=0;	//Read from memory using address stored in RA
@@ -157,28 +175,31 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 					Mr7WB<=1;	// Write back mem_data to R7
 				else
 					Mr7WB<=0;	//Don't Care
-				break;
-			0111:	//SM
+				
+			end
+			4'b0111:	//SM
+			begin
 				rA1<= IR[11:9];	//RA
-				for(i=0;i<8;i++)
-				{
-					if(LM_Imm[i]==1)
-					{
-						case (i)
-						0:	rA2<=3'b000; break;	//R0
-						1:	rA2<=3'b001; break;	//R1
-						2:	rA2<=3'b010; break;	//R2
-						3:	rA2<=3'b011; break;	//R3
-						4:	rA2<=3'b100; break;	//R4
-						5:	rA2<=3'b101; break;	//R5
-						6:	rA2<=3'b110; break;	//R6
-						7:	rA2<=3'b111;	//R7
-						break;
-					}
-				}
+				if(LM_Imm[0]==1)
+					wA <=3'b000;
+				else if(LM_Imm[1]==1)
+					wA <=3'b001;
+				else if(LM_Imm[2]==1)
+				wA <=3'b010;
+				else if(LM_Imm[3]==1)
+				wA <=3'b011;
+					else if(LM_Imm[4]==1)
+				wA <=3'b100;
+					else if(LM_Imm[5]==1)
+				wA <=3'b101;
+					else if(LM_Imm[6]==1)
+				wA <=3'b110;
+					else if(LM_Imm[7]==1)
+				wA <=3'b111;
+				
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
-				wCCR<=1;	//No disturbance to CCR
+				
 				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Write memory operation done
 				MmemR<=0;	//Don't Care
@@ -186,13 +207,15 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				MmemData<=1;	//Write to memory. data in Rfout2
 				MregWB<=0;	//Don't Care
 				Mr7WB<=0;	//Don't Care
-				break;
-			1100:	//BEQ
+				
+			end
+			4'b1100:	//BEQ
+			begin
 				rA1<= IR[11:9];	//RA
 				rA2<= IR[8:6];	//RB
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
-				wCCR<=1;	//No disturbance to CCR
+				
 				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//No memory write
 				MmemR<=0;	//Don't Care
@@ -200,12 +223,14 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				MmemData<=0;	//Don't Care
 				MregWB<=0;	//Don't Care
 				Mr7WB<=2;	//PC_Imm -> r7
-				break;
-			1000:	//JAL
+				
+			end
+			4'b1000:	//JAL
+			begin
 				wA<= IR[11:9];	//RA
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
-				wCCR<=1;	//No disturbance to CCR
+				
 				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Don't disturb your memory
 				MmemR<=0;	//Don't Care
@@ -213,13 +238,15 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				MmemData<=0;	//Don't Care
 				MregWB<=3;	//Write back PC+1
 				Mr7WB<=2;	//PC_Imm -> r7
-				break;
-			1001:	//JLR
+				
+			end
+			4'b1001:	//JLR
+			begin
 				rA2<= IR[8:6];	//RB
 				wA<= IR[11:9];	//RA
 				Mex1<=0;	//Don't care
 				Mex2<=0;	//Don't Care
-				wCCR<=1;	//No disturbance to CCR
+				
 				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Don't disturb your memory
 				MmemR<=0;	//Don't Care
@@ -227,11 +254,117 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				MmemData<=0;	//Don't Care
 				MregWB<=3;	//Write back PC+1
 				Mr7WB<=4;	//Write Rfout2 to R7
-				break;
-		end
+				
+			end
+			default:
+			begin
+				rA1<=3'b0
+				rA2<=3'b0;	//RB
+				wA<= 3'b0;	//RA
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
+				
+				alu_ctrl<=0;	//Don't Care
+				wMem<=1;	//Don't disturb your memory
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
+				MregWB<=0;	
+				Mr7WB<=0;	
+			
+		endcase
 	end
 	
 	
 endmodule
 
-`endif
+
+module sext6(in, out);		// Sign Extension 6 to 16
+	
+	input  [5:0] in;
+	output [15:0] out;
+	assign out = {{10{in[5]}}, in[5:0]};
+	
+endmodule
+module add(in1, in2 , out);		// Implements a full 16-bit adder
+	
+	output [15:0] out;
+	input  [15:0] in1, in2;
+	wire   [16:0] outTemp;
+
+	assign outTemp = in1 + in2;
+	assign out     = outTemp[15:0];
+	
+endmodule
+
+
+module mux16x8(data0, data1, data2, data3, data4, data5, data6, data7, selectInput, out);  // 8-16bit-input mux
+
+	output reg [15:0] out;
+	input  [15:0] data0, data1, data2, data3, data4, data5, data6, data7;
+	input  [2:0] selectInput;
+	
+	always@(data0 or data1 or data2 or data3 or data4 or data5 or data6 or data7 or selectInput) begin
+		case(selectInput)
+			0: out = data0;
+			1: out = data1;
+			2: out = data2;
+			3: out = data3;
+			4: out = data4;
+			5: out = data5;
+			6: out = data6;
+			7: out = data7;
+		endcase
+	end
+	
+endmodule
+
+module mux2x4(data0, data1, data2, data3,selectInput,out);
+	output reg[1:0] out;
+	input [1:0] data0, data1, data2, data3;
+	input  [1:0] selectInput;
+	
+	always@(data0 or data1 or data2 or data3 or selectInput) begin
+		case(selectInput)
+			0: out = data0;
+			1: out = data1;
+			2: out = data2;
+			3: out = data3;
+		endcase
+	end
+endmodule
+	
+
+module mux16x4(data0, data1, data2, data3, selectInput, out);  // 4-16bit-input mux
+
+	output reg [15:0] out;
+	input  [15:0] data0, data1, data2, data3;
+	input  [1:0] selectInput;
+	
+	always@(data0 or data1 or data2 or data3 or selectInput) begin
+		case(selectInput)
+			0: out = data0;
+			1: out = data1;
+			2: out = data2;
+			3: out = data3;
+		endcase
+	end
+	
+endmodule
+
+
+module mux16x2(data0, data1, selectInput, out);  // 2-16bit-input mux
+
+	output reg [15:0] out;
+	input  [15:0] data0, data1;
+	input  selectInput;
+	
+	always@(data0 or data1 or selectInput) begin
+		case(selectInput)
+			0: out = data0;
+			1: out = data1;
+		endcase
+	end
+	
+endmodule
+
