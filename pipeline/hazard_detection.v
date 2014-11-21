@@ -80,56 +80,56 @@ parameter JLR = 4'b1001;
 				flush_if_id = 1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op1==ADI&&pr1RB==3'b111)
+			else if(op1[5:2]==ADI&&pr1RB==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op2==ADI&&pr2RB==3'b111)
+			else if(op2[5:2]==ADI&&pr2RB==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op3==ADI&&pr2RB==3'b111)
+			else if(op3[5:2]==ADI&&pr2RB==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==LW||op1==LM)&&pr1RA==3'b111)
+			else if((op1[5:2]==LW||op1[5:2]==LM)&&pr1RA==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op2==LW||op2==LM)&&pr2RA==3'b111)
+			else if((op2[5:2]==LW||op2[5:2]==LM)&&pr2RA==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op3==LW||op3==LM)&&pr3RA==3'b111)
+			else if((op3[5:2]==LW||op3[5:2]==LM)&&pr3RA==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op4==LW||op4==LM)&&pr4RA==3'b111)
+			else if((op4[5:2]==LW||op4[5:2]==LM)&&pr4RA==3'b111)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op1==LM||op1==SM)
+			else if(op1[5:2]==LM||op1[5:2]==SM)
 			begin
 					if(LM_Imm[0]==1)
 					begin
@@ -201,42 +201,42 @@ parameter JLR = 4'b1001;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==LW)&&(op2==LW||op2==LM)&&(pr1RB==pr2RA)) // lw/lm followed by lw
+			else if((op1[5:2]==LW)&&(op2[5:2]==LW||op2[5:2]==LM)&&(pr1RB==pr2RA)) // lw/lm followed by lw
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==LM)&&(op2==LW||op2==LM)&&(pr1RA==pr2RA)) //lw/lm followed by LM
+			else if((op1[5:2]==LM)&&(op2[5:2]==LW||op2[5:2]==LM)&&(pr1RA==pr2RA)) //lw/lm followed by LM
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==SW)&&(op2==LW||op2==LM)&&(pr1RB==pr2RA))        //load followed by store
+			else if((op1[5:2]==SW)&&(op2[5:2]==LW||op2[5:2]==LM)&&(pr1RB==pr2RA))        //load followed by store
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op1==JAL)
+			else if(op1[5:2]==JAL)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op1==JLR)
+			else if(op1[5:2]==JLR)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if(op2==JLR)
+			else if(op2[5:2]==JLR)
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
@@ -244,28 +244,28 @@ parameter JLR = 4'b1001;
 				pc_write = 1'b1;
 				end
 			 
-			else if((op1==SM||op1==LM)&&(op2==ADD||op2==NDU||op2==ADC||op2==ADZ||op2==NDC||op2==NDC||op2==NDZ)&&(pr1RA==pr2RC))
+			else if((op1[5:2]==SM||op1[5:2]==LM)&&(op2==ADD||op2==NDU||op2==ADC||op2==ADZ||op2==NDC||op2==NDC||op2==NDZ)&&(pr1RA==pr2RC))
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==SM||op1==LM)&&(op2==ADI)&&(pr1RA==pr2RB))
+			else if((op1[5:2]==SM||op1[5:2]==LM)&&(op2[5:2]==ADI)&&(pr1RA==pr2RB))
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==SM||op1==LM)&&(op2==LHI)&&(pr1RA==pr2RA))
+			else if((op1[5:2]==SM||op1[5:2]==LM)&&(op2[5:2]==LHI)&&(pr1RA==pr2RA))
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
 				flush_if_id=1'b1;
 				pc_write = 1'b1;
 				end
-			else if((op1==SM||op1==LM)&&(op2==LW||op2==LM)&&(pr1RA==pr2RA))
+			else if((op1[5:2]==SM||op1[5:2]==LM)&&(op2[5:2]==LW||op2[5:2]==LM)&&(pr1RA==pr2RA))
 				begin
 				flush_reg_ex=1'b0;
 				flush_id_reg=1'b0;
