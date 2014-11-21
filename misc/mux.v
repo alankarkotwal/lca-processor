@@ -44,7 +44,7 @@ endmodule
 module mux16x2(data0, data1, selectInput, out);  // 2-16bit-input mux
 
 	output reg [15:0] out;
-	input  [15:0] data0, data1, data2, data3;
+	input  [15:0] data0, data1;
 	input  selectInput;
 	
 	always@(data0 or data1 or selectInput) begin
