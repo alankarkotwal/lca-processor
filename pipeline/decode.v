@@ -4,8 +4,9 @@
 
 module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
 	output [15:0] PC_Imm, Sext_Imm6, Imm970;
-	output [2:0] rA1, rA2, wA, i;
-	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB;
+	output [2:0] rA1, rA2, wA, i, MregWB;
+	output Mex1, Mex2, wCCR, wMem, alu_ctrl, MmemR, MmemW;
+	output [3:0] Mr7WB;
 	input [15:0] fromPipe1PC, fromPipe1IR;
 	reg [15:0] imm6, imm9;
 	reg select, offset;
@@ -30,31 +31,33 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex1<= 0;	//Rfout1
 				Mex2<= 0;	//Rfout2
 				wCCR<= 0;	//Write CCR
-				wMem<=1;	// No memory write
 				alu_ctrl<=0;	//Add operation
-				MregWB<=1;	//Write back Aluout
-/*				wR7<=1;	//R7 not being written
-				case(IR[1:0])
-				begin
-					00:
-						wRF<= 0; //Register file write
-						break;
-					10:
-						if(carry set)
-							wRF<= 0; //Register file write
-						else
-							wRF<= 1; //Do not store in RegC
-					01:*/
+				wMem<=1;	// No memory write
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
+				MregWB<=1;	//Write back Alu_out
+				if(IR[5:3]==3'b111)	//If RC is R7
+					Mr7WB<=3;	//Write back Alu_out to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0001:	//ADI
-				rA1<= IR[11:9];
-				wA<= IR[8:6];
+				rA1<= IR[11:9];	//RA
+				wA<= IR[8:6];	//RB
 				Mex1<= 0;	//Rfout1
 				Mex2<= 1;	//Sext_Imm6;
 				wCCR<= 0;	//Write CCR
-				wMem<=1;	// No memory write
 				alu_ctrl<=0;	//ADD
+				wMem<=1;	// No memory write
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=1; 	//Write back Alu_out
+				if(IR[8:6]==3'b111)	//If RB is R7
+					Mr7WB<=3;	//Write back Alu_out to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0010:	//NDU, NDC, NDZ
 				rA2<= IR[8:6];	//RB
@@ -63,15 +66,32 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex1<= 0;	//Rfout1
 				Mex2<= 0;	//Rfout2
 				wCCR<= 0;	//Write CCR
-				wMem<=1;	// No memory write
 				alu_ctrl<=1;	//Nand operation
+				wMem<=1;	// No memory write
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=1;	//Write back Alu_out
+				if(IR[5:3]==3'b111)	//If RC is R7
+					Mr7WB<=3;	//Write back Alu_out to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0011:	//LHI
 				wA<= IR[11:9];	//RA
-				wCCR<=1;	
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't care
+				wCCR<=1;	//CCR write not required
+				alu_ctrl<=0;	//Don't care
 				wMem<=1;	//No memory write
-				MregWB<=1;	//Write back alu_out
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
+				MregWB<=2;	//Write back Imm970 to RA
+				if(IR[11:9]==3'b111) //If RA is R7
+					Mr7WB<=0;	// Write back Imm970 to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0100:	//LW
 				wA<= IR[11:9];	//RA
@@ -79,10 +99,16 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex1<=1;	//Sign Extended Immediate six bit
 				Mex2<=0;	//Rfout2
 				wCCR<=0;	//Zero flag is set by this instruction
-				wMem<=1;	//No memory write
 				alu_ctrl<=0;	//ADD
+				wMem<=1;	//No memory write
 				MmemR<=1;	//Read from memory using address in Alu_out
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=0;	//Write back mem_data
+				if(IR[11:9]==3'b111) //If RA is R7
+					Mr7WB<=1;	// Write back mem_data to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0101:	//SW
 				rA2<= IR[8:6];	//RB
@@ -90,10 +116,13 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				Mex1<=1;	//Sign Extended Immediate six bit
 				Mex2<=0;	//Rfout2
 				wCCR<=1;
-				wMem<=0;	// Write to memory
 				alu_ctrl<=0;	//Add
+				wMem<=0;	// Write to memory
+				MmemR<=0;	//Don't Care
 				MmemW<=1;	//Write to memory. address in Alu_out
-				MmemData<=2;	//Write to memonry. Data present in rfout1
+				MmemData<=2;	//Write to memory. Data present in rfout1
+				MregWB<=0;	//Don't Care
+				Mr7WB<=0;	//Don't Care
 				break;
 			0110:	//LM
 				rA1<= IR[11:9];	//RA
@@ -116,7 +145,12 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wCCR<=1;	//No disturbance to CCR
 				wMem<=1;	//No memory write operation
 				MmemR<=0;	//Read from memory using address stored in RA
+				MmemW<=0;	//Don't Care
 				MregWB<=0;	//Write back the value in mem_data
+				if(IR[11:9]==3'b111) //If RA is R7
+					Mr7WB<=1;	// Write back mem_data to R7
+				else
+					Mr7WB<=0;	//Don't Care
 				break;
 			0111:	//SM
 				rA1<= IR[11:9];	//RA
@@ -140,12 +174,15 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wMem<=1;	//Write memory operation done
 				MmemW<=0;	//Write to memory. address in RA
 				MmemData<=3;	//Write to memory. data in Rfout2
+				MregWB<=0;	//Don't Care
+				Mr7WB<=0;	//Don't Care
 				break;
 			1100:	//BEQ
 				rA1<= IR[11:9];	//RA
 				rA2<= IR[8:6];	//RB
 				wMem<=1;	//No memory write
 				wCCR<=1;	//No disturbance to CCR
+				MregWB<=0;	//Don't Care
 				Mr7WB<=2;	//PC_Imm -> r7
 				break;
 			1000:	//JAL
@@ -161,6 +198,7 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wMem<=1;	//Don't disturb your memory
 				wCCR<=1;	//Let these kids rest in peace
 				MregWB<=3;	//Write back PC+1
+				Mr7WB<=4;	//Write Rfout2 to R7
 				break;
 		end
 	end
