@@ -120,7 +120,7 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 				wMem<=0;	// Write to memory
 				MmemR<=0;	//Don't Care
 				MmemW<=1;	//Write to memory. address in Alu_out
-				MmemData<=2;	//Write to memory. Data present in rfout1
+				MmemData<=0;	//Write to memory. Data present in rfout1
 				MregWB<=0;	//Don't Care
 				Mr7WB<=0;	//Don't Care
 				break;
@@ -142,10 +142,14 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 						break;
 					}
 				}
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
 				wCCR<=1;	//No disturbance to CCR
+				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//No memory write operation
 				MmemR<=0;	//Read from memory using address stored in RA
 				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=0;	//Write back the value in mem_data
 				if(IR[11:9]==3'b111) //If RA is R7
 					Mr7WB<=1;	// Write back mem_data to R7
@@ -170,33 +174,55 @@ module decode(fromPipe1PC, fromPipe1IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970,
 						break;
 					}
 				}
-				wCCR<=1;	//CCR write not to be done
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
+				wCCR<=1;	//No disturbance to CCR
+				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Write memory operation done
+				MmemR<=0;	//Don't Care
 				MmemW<=0;	//Write to memory. address in RA
-				MmemData<=3;	//Write to memory. data in Rfout2
+				MmemData<=1;	//Write to memory. data in Rfout2
 				MregWB<=0;	//Don't Care
 				Mr7WB<=0;	//Don't Care
 				break;
 			1100:	//BEQ
 				rA1<= IR[11:9];	//RA
 				rA2<= IR[8:6];	//RB
-				wMem<=1;	//No memory write
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
 				wCCR<=1;	//No disturbance to CCR
+				alu_ctrl<=0;	//Don't Care
+				wMem<=1;	//No memory write
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=0;	//Don't Care
 				Mr7WB<=2;	//PC_Imm -> r7
 				break;
 			1000:	//JAL
 				wA<= IR[11:9];	//RA
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
+				wCCR<=1;	//No disturbance to CCR
+				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Don't disturb your memory
-				wCCR<=1;	//Let these kids rest in peace
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=3;	//Write back PC+1
 				Mr7WB<=2;	//PC_Imm -> r7
 				break;
 			1001:	//JLR
 				rA2<= IR[8:6];	//RB
 				wA<= IR[11:9];	//RA
+				Mex1<=0;	//Don't care
+				Mex2<=0;	//Don't Care
+				wCCR<=1;	//No disturbance to CCR
+				alu_ctrl<=0;	//Don't Care
 				wMem<=1;	//Don't disturb your memory
-				wCCR<=1;	//Let these kids rest in peace
+				MmemR<=0;	//Don't Care
+				MmemW<=0;	//Don't Care
+				MmemData<=0;	//Don't Care
 				MregWB<=3;	//Write back PC+1
 				Mr7WB<=4;	//Write Rfout2 to R7
 				break;
