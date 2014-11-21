@@ -241,9 +241,17 @@ if(regread_ex_op==ADC||regread_ex_op==ADZ||regread_ex_op==NDC||regread_ex_op==ND
 			FCCR = 2'b1;
 		else if((mem_wb_op==ADD||mem_wb_op==NDU||mem_wb_op==ADC||mem_wb_op==ADZ||mem_wb_op[5:2]==ADI||mem_wb_op==NDC||mem_wb_op==NDZ)&&(mem_wb_CCR_write==1'b0))
 			FCCR = 2'd2;
+		else if((regread_ex_op==ADZ||regread_ex_op==NDZ)&&(ex_mem_op==LW)&&(ex_mem_CCR_write==1'b0))
+		
+			FCCR = 2'b1;
+		
+		else if((regread_ex_op==ADZ||regread_ex_op==NDZ)&&(mem_wb_op==LW)&&(mem_wb_CCR_write==1'b0))
+			FCCR = 2'd2;
+			
 		else 
 			FCCR = 2'b0;
 		end
+
 else 
 	FCCR = 2'b0;
 end
