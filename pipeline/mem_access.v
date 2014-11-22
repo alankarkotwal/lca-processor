@@ -5,7 +5,7 @@
 `include "../misc/plus_one.v"
 `include "../memory/data_mem.v"
 
-module mem_access(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, RAMemSelectInput, wASelectInput, MemData, DataInSelect, WriteMem, RAFromPipeInc, SignalC,
+module mem_access(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, RAMemSelectInput, wASelectInput, MemData, DataInSelect, WriteMem, RAFromPipeInc, SignalC
 				  , Rfout1, Rfout2, mem_wb_CCR_write, ex_mem_CCR_write);
 
 	output [15:0] MemData, RAFromPipeInc;
