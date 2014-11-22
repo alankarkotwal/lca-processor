@@ -5,17 +5,18 @@
 `include "../misc/plus_one.v"
 `include "../memory/data_mem.v"
 
-module mem_access(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, rASelectInput, wASelectInput, MemData, DataIn, DataInSelect, WriteMem, RAFromPipeInc, SignalC,
-				  Forwarded, F3, Rfout1, Rfout2, mem_wb_CCR_write, ex_mem_CCR_write);
+module mem_access(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, RAMemSelectInput, wASelectInput, MemData, DataInSelect, WriteMem, RAFromPipeInc, SignalC,
+				  , Rfout1, Rfout2, mem_wb_CCR_write, ex_mem_CCR_write);
 
-	output [15:0] MemData, RAFromPipeInc, DataIn;
-	input  [15:0] ALUOut, RAFromPipe, Rfout1, Rfout2, SignalC, Forwarded, IRfrompipe5, IRfrompipe4;
-	input         rASelectInput, wASelectInput, WriteMem, DataInSelect, mem_wb_CCR_write, ex_mem_CCR_write;
+	output [15:0] MemData, RAFromPipeInc;
+	wire [15:0] DataIn;
+	input  [15:0] ALUOut, RAFromPipe, Rfout1, Rfout2, SignalC, , IRfrompipe5, IRfrompipe4;
+	input         RAMemSelectInput, wASelectInput, WriteMem, DataInSelect, mem_wb_CCR_write, ex_mem_CCR_write;
 	wire   [15:0] readAddSelected, writeAddSelected, DataInSelected;
 	
-	mux16x2 RASelect(.data0(RAFromPipe), .data1(ALUOut), .selectInput(rASelectInput), .out(readAddSelected));
-	mux16x2 WASelect(.data0(RAFromPipe), .data1(ALUOut), .selectInput(wASelectInput), .out(writeAddSelected));
-	mux16x4 DataSelect2(.data0(SignalC), .data1(SignalB), .data2(DataInSelected), .data3(Forwarded), .SelectInput(F3), .out(DataIn));
+	mux16x2 RASelect(.data0(RAFromPipe), .data1(ALUOut), .selectInput(RAMemSelectInput), .out(readAddSelected));
+	mux16x2 WASelect(.data0(RAFromPipe), .data1(ALUOut), .selectInput(WAMemSelectInput), .out(writeAddSelected));
+	mux16x4 DataSelect2(.data0(DataInSelected), .data1(SignalB), .data2(SignalC), .data3(16'b0), .SelectInput(F3), .out(DataIn));
 	mux16x2 DataSelect1(.data0(Rfout1), .data1(Rfout2), .selectInput(DataInSelect), .out(DataInSelected));
 	data_mem DataMemory(.readAdd(readAddSelected), .out(MemData), .writeAdd(writeAddSelected), .in(DataIn), .write(WriteMem));
 	plus_one Inc(.in(RAFromPipe), .out(RAFromPipeInc));
@@ -55,9 +56,9 @@ module forward_mem_stage(mem_wb_op,mem_wb_regA,mem_wb_regC,ex_mem_op,ex_mem_regA
 		begin
 			if((ex_mem_regA == mem_wb_regC)&&(mem_wb_op==ADD||mem_wb_op==NDU||mem_wb_op==ADC||mem_wb_op==ADZ
 									||mem_wb_op==NDC||mem_wb_op==NDZ)&&(mem_wb_CCR_write==1'b0))
-				F3 = 2'd2;//b				
+				F3 = 2'd1;//b				
 			else if((ex_mem_regA==mem_wb_regA)&&(mem_wb_op[5:2]==LW))
-				F3 = 2'd3;//c
+				F3 = 2'd2;//c
 			else	
 				F3 = 2'b0;
 		end

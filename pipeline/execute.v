@@ -1,7 +1,8 @@
-module execute(	clk, reset, ALUOut, ALUOp,fromPlusOneMem, fromRFOut1, fromRFOut2, RASelectInput, CCRWrite, CCR_Write_from_wb,CCRWriteValue,CCRWriteValue_from_wb, fromSImm6, ExMux1Select, ExMux2Select,
+module execute(	clk, reset, ALUOut, ALUOp,fromPlusOneMem, fromRFOut1, fromRFOut2, RASelectInput, CCRWrite, CCR_Write_from_wb,CCRWriteValue,
+CCRWriteValue_from_wb, fromSImm6, ExMux1Select, ExMux2Select,
 		RAOut, CCR,IR,SignalA,SignalB,SignalC,SignalG,SignalI,SignalJ,SignalK,SignalX,SignalY,
 		mem_wb_op,mem_wb_regA,mem_wb_regB,mem_wb_regC,ex_mem_op,ex_mem_regA,ex_mem_regB,ex_mem_regC,
-		regread_ex_op,regread_ex_regA,regread_ex_regB,regread_ex_regC,,mem_wb_CCR_write,ex_mem_CCR_write,r7,rf);
+		regread_ex_op,regread_ex_regA,regread_ex_regB,regread_ex_regC,mem_wb_CCR_write,ex_mem_CCR_write,r7,rf);
 
 		
 parameter ADD = 6'b000000;
