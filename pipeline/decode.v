@@ -3,9 +3,9 @@
 
 
 
-module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB, pipe2IR);
+module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970, Mex1, Mex2, wMem, alu_ctrl, MregWB, MmemR, MmemW, Mr7WB);
 	output  [15:0] PC_Imm, Sext_Imm6, Imm970;
-	output reg [15:0]pipe2IR;
+
 	output reg [2:0] rA1, rA2, wA, MregWB;
 	output reg MmemData;
 	integer i;
@@ -26,7 +26,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 	
 	always@(*)	
 	begin
-	pipe2IR<=IR[15:0];
+	
 		case (IR[15:12])
 			
 			4'b0000:	//ADD, ADC, ADZ

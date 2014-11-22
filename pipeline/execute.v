@@ -1,7 +1,7 @@
 module execute(	clk, reset, ALUOut, ALUOp,fromPlusOneMem, fromRFOut1, fromRFOut2, RASelectInput, CCRWrite, CCR_Write_from_wb,CCRWriteValue,CCRWriteValue_from_wb, fromSImm6, ExMux1Select, ExMux2Select,
 		RAOut, CCR,IR,SignalA,SignalB,SignalC,SignalG,SignalI,SignalJ,SignalK,SignalX,SignalY,
 		mem_wb_op,mem_wb_regA,mem_wb_regB,mem_wb_regC,ex_mem_op,ex_mem_regA,ex_mem_regB,ex_mem_regC,
-		regread_ex_op,regread_ex_regA,regread_ex_regB,regread_ex_regC,,mem_wb_CCR_write,ex_mem_CCR_write);
+		regread_ex_op,regread_ex_regA,regread_ex_regB,regread_ex_regC,,mem_wb_CCR_write,ex_mem_CCR_write,r7,rf);
 
 		
 parameter ADD = 6'b000000;
@@ -13,6 +13,7 @@ parameter NDC = 6'b001010;
 parameter NDZ = 6'b001001;
 	output [15:0] RAOut, ALUOut;
 	output [ 1:0] CCR;
+	output r7,rf;
 	output    reg    CCRWrite;//send to pipeline register
 	output  [ 1:0] CCRWriteValue;//send to pipeline register
 	input CCR_Write_from_wb;
@@ -46,7 +47,7 @@ parameter NDZ = 6'b001001;
 	register2 CCRReg(.clk(clk), .out(CCR), .in(CCRWriteValue_from_wb), .write(CCR_Write_from_wb), .reset(reset));
 	alu me(.in1(ALUIn1), .in2(ALUIn2), .op(ALUOp), .out(ALUOut), .zero(ALUZero), .carry(ALUCarry));
 	forward_ex_stage f_ex(.mem_wb_op(mem_wb_op),.mem_wb_regA(mem_wb_regA),.mem_wb_regB(mem_wb_regB),.mem_wb_regC(mem_wb_regC),.ex_mem_op(ex_mem_op),.ex_mem_regA(ex_mem_regA),.ex_mem_regB(ex_mem_regB),.ex_mem_regC(ex_mem_regC),.regread_ex_op(regread_ex_op),.regread_ex_regA(regread_ex_regA),.regread_ex_regB(regread_ex_regB),
-.regread_ex_regC(regread_ex_regC),.F1(ExMux3Select),.F2(ExMux4Select),.FCCR(CCR_muxSelect),.mem_wb_CCR_write(mem_wb_CCR_write),.ex_mem_CCR_write(ex_mem_CCR_write));
+.regread_ex_regC(regread_ex_regC),.F1(ExMux3Select),.F2(ExMux4Select),.FCCR(CCR_muxSelect),.mem_wb_CCR_write(mem_wb_CCR_write),.ex_mem_CCR_write(ex_mem_CCR_write).rf(rf),.r7(r7));
 	assign CCRWriteValue = {ALUZero, ALUCarry};
 	always @(*)
 	begin
@@ -248,7 +249,7 @@ module register1(clk, out, in, write, reset);  // Negedge-triggered flipflop reg
 endmodule
 
 module forward_ex_stage(mem_wb_op,mem_wb_regA,mem_wb_regB,mem_wb_regC,ex_mem_op,ex_mem_regA,ex_mem_regB,ex_mem_regC,regread_ex_op,regread_ex_regA,regread_ex_regB,
-regread_ex_regC,F1,F2,FCCR,mem_wb_CCR_write,ex_mem_CCR_write);
+regread_ex_regC,F1,F2,FCCR,mem_wb_CCR_write,ex_mem_CCR_write,writer7,writerf);
 
 parameter ADD = 6'b000000;
 parameter NDU = 6'b001000;
@@ -271,6 +272,7 @@ input [5:0]mem_wb_op,ex_mem_op,regread_ex_op;
 input mem_wb_CCR_write,ex_mem_CCR_write;
 output reg [2:0]F1,F2;
 output reg [1:0]FCCR;
+output reg rf,r7;
 
 
 			
@@ -467,25 +469,121 @@ always @(*)
 begin
 if(regread_ex_op==ADC||regread_ex_op==ADZ||regread_ex_op==NDC||regread_ex_op==NDZ) 
 		begin
+	
 		if((ex_mem_op==ADD||ex_mem_op==NDU||ex_mem_op==ADC||ex_mem_op==ADZ||ex_mem_op[5:2]==ADI||ex_mem_op==NDC||ex_mem_op==NDZ)&&(ex_mem_CCR_write==1'b0))//if the current op is conditional on CCR, CCR needs to be forwarded
+			begin
 			FCCR = 2'b1;
+				if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				writer7=1'b1;
+				writerf=1'b0;
+			end
 		else if((mem_wb_op==ADD||mem_wb_op==NDU||mem_wb_op==ADC||mem_wb_op==ADZ||mem_wb_op[5:2]==ADI||mem_wb_op==NDC||mem_wb_op==NDZ)&&(mem_wb_CCR_write==1'b0))
+			begin
 			FCCR = 2'd2;
+				if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				begin
+					writer7=1'b1;
+					writerf=1'b0;
+				end
+			end
 		else if((regread_ex_op==ADZ||regread_ex_op==NDZ)&&(ex_mem_op==LW)&&(ex_mem_CCR_write==1'b0))
-		
+			begin
 			FCCR = 2'b1;
+				if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else
+				begin
+					writer7=1'b1;
+					writerf=1'b0;			
+				end
+			end
 		
 		else if((regread_ex_op==ADZ||regread_ex_op==NDZ)&&(mem_wb_op==LW)&&(mem_wb_CCR_write==1'b0))
+			begin
 			FCCR = 2'd2;
-			
+				if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				begin
+					writer7=1'b1;
+					writerf=1'b0;	
+				end
+			end
 		else 
+			begin
 			FCCR = 2'b0;
+			if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				begin
+					writer7=1'b1;
+					writerf=1'b0;	
+				end
+				
+			
 		end
 
-else 
+else if(regread_ex_op==ADC||regread_ex_op==NDU)
+	begin
 	FCCR = 2'b0;
+				if(regread_ex_regC==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				begin
+					writer7=1'b1;
+					writerf=1'b0;	
+				end
+	end//unconditional operations
+else if(regread_ex_op==LW||regread_ex_op==LM||regread_ex_op==LHI)
+	begin
+	FCCR = 2'b0;
+				if(regread_ex_regA==3'b111)
+				begin
+					writer7=1'b0;
+					writerf=1'b1;
+				end
+				else 
+				begin
+					writer7=1'b1;
+					writerf=1'b0;	
+				end
+	end//load operations
+else if(regread_ex_op==JAL||regread_ex_op==JLR)
+	begin
+	FCCR=2'b0;
+		writer7=1'b1;
+		writerf=1'b0;
+	end//jump operations, which modiy registers
+else
+	begin
+	FCCR=1'b0;
+	writer7=1'b1;
+	writerf=1'b1;
+	end
+	
 end
-
 
 endmodule
 
