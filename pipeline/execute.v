@@ -28,7 +28,7 @@ parameter NDZ = 6'b001001;
 	//inputs required for forwarding
 	input [2:0] mem_wb_regA,mem_wb_regB,mem_wb_regC,ex_mem_regA,ex_mem_regB,ex_mem_regC,regread_ex_regA,regread_ex_regB,regread_ex_regC;
 	input [5:0]mem_wb_op,ex_mem_op,regread_ex_op;
-	input mem_wb_CCR_write,ex_mem_CCR_write;
+	input ex_mem_CCR_write;
 	//
 	
 	
@@ -48,7 +48,7 @@ parameter NDZ = 6'b001001;
 	register2 CCRReg(.clk(clk), .out(CCR), .in(CCRWriteValue_from_wb), .write(CCR_Write_from_wb), .reset(reset));
 	alu me(.in1(ALUIn1), .in2(ALUIn2), .op(ALUOp), .out(ALUOut), .zero(ALUZero), .carry(ALUCarry));
 	forward_ex_stage f_ex(.mem_wb_op(mem_wb_op),.mem_wb_regA(mem_wb_regA),.mem_wb_regB(mem_wb_regB),.mem_wb_regC(mem_wb_regC),.ex_mem_op(ex_mem_op),.ex_mem_regA(ex_mem_regA),.ex_mem_regB(ex_mem_regB),.ex_mem_regC(ex_mem_regC),.regread_ex_op(regread_ex_op),.regread_ex_regA(regread_ex_regA),.regread_ex_regB(regread_ex_regB),
-.regread_ex_regC(regread_ex_regC),.F1(ExMux3Select),.F2(ExMux4Select),.FCCR(CCR_muxSelect),.mem_wb_CCR_write(mem_wb_CCR_write),.ex_mem_CCR_write(ex_mem_CCR_write).rf(rf),.r7(r7));
+.regread_ex_regC(regread_ex_regC),.F1(ExMux3Select),.F2(ExMux4Select),.FCCR(CCR_muxSelect),.mem_wb_CCR_write(CCR_Write_from_wb),.ex_mem_CCR_write(ex_mem_CCR_write).rf(rf),.r7(r7));
 	assign CCRWriteValue = {ALUZero, ALUCarry};
 	always @(*)
 	begin
