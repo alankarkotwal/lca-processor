@@ -53,7 +53,7 @@ parameter JLR = 4'b1001;
 	
 		begin
 		new_IR_multi[15:8]=pr1_IR[15:8];
-			if(op3==BEQ&&equ==1'b1)
+			if(op3[5:2]==BEQ&&equ==1'b1)
 				begin
 				flush_reg_ex=1'b1;
 				flush_id_reg=1'b1;
