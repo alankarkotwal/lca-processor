@@ -4,9 +4,9 @@
 
 module lca_processor(clk,reset);
 input clk,reset;
-fetch stage1(.IR_load_mux(IR_load_mux),.new_IR_multi(new_IR_multi), .equ(equalValue), .pr2_IR(pr2_IR) ,.pr3_IR(pr3_IR) , .pr4_IR(pr4_IR), .pr5_IR(pr5_IR), .fromPipe2_PCim(fromPipe2_PCim), 
-.fromPipe2_970(fromPipe2_970), .fromPipe3RFOut(fromPipe3RFOut), .fromPipe3PCInc(fromPipe3PCInc), .fromPipe4_Aluout(fromPipe4_Aluout), .fromPipe5Mem(fromPipe5Mem), .PCWrite(pc_write),
- .PCOut(to_pr1_PC), .IROut(to_pr1IR), .incPCOut(to_pr1_PCInc), .clk(clk), .reset(reset));
+fetch stage1(.IR_load_mux(IR_load_mux),.new_IR_multi(new_IR_multi), .equ(equalValue), .pr2_IR(pr2_IR) ,.pr3_IR(pr3_IR) , .pr4_IR(pr4_IR), .pr5_IR(pr5_IR),
+ .fromPipe2_PCim(fromPipe2_PCim), .fromPipe2_970(fromPipe2_970), .fromPipe3RFOut(fromPipe3RFOut), .fromPipe3PCInc(fromPipe3PCInc), 
+ .fromPipe4_Aluout(fromPipe4_Aluout), .fromPipe5Mem(fromPipe5Mem), .PCWrite(pc_write),.PCOut(to_pr1_PC), .IROut(to_pr1IR), .incPCOut(to_pr1_PCInc), .clk(clk), .reset(reset));
 pipeline_reg1 p1(.clk(clk), .reset(reset), .toPCInc(to_pr1_PCInc), .toPC(to_pr1_PC), .toIR(to_pr1_IR), .PCInc(pr1_PCInc), .PC(pr1_PC), .IR(pr1_IR),
  .tofirst_multiple(to_pr1_first_multiple),
 .first_multiple(pr1_first_multiple),.flush(flush_if_id));
@@ -30,7 +30,7 @@ pipeline_reg2 p2(.clk(clk), .reset(reset),.toMex1(to_pr2_Mex1),.Mex1(pr2_Mex1),.
 reg_read stage3(.in(writeData), .readAdd1(pr2_rA1), .readAdd2(pr2_rA2), .regValue1(regValue1), .regValue2(regValue2), .equalValue(equalValue), .write(pr5_WriteRF), 
 .writeAdd(pr5_WriteAdd), .writeR7(pr5_WriteR7), .inR7(writeR7Data), .clk(clk), .reset(reset),);
 
-pipeline_reg3 p3(.clk(clk), .reset(reset), .toalu_ctrl(pr2_alu_ctrl) ,.alu_ctrl(pr3_alu_ctrl),
+pipeline_reg3 p3(.flush().clk(clk), .reset(reset), .toalu_ctrl(pr2_alu_ctrl) ,.alu_ctrl(pr3_alu_ctrl),
   .toImm970s(pr2_Imm970), .toPCImmInc(pr2_PCImmInc), .toPCInc(pr2_PCInc), .toWriteAdd(pr2_WriteAdd), .toRegWriteSelect(pr2_MregWB), .toR7WriteSelect(pr2_Mr7WB),
   .toWriteMem(pr2_WriteMem), .toRFOut1(regValue1), .toRFOut2(regValue2), .toEqu(equalValue), .toSImm6(pr2_SImm6), .toIR(pr2_IR),
 .WriteRF(pr3_WriteRF), .Imm970s(pr3_Imm970s), .PCImmInc(pr3_PCImmInc), .PCInc(pr3_PCInc), .WriteAdd(pr3_WriteAdd), .WriteR7(pr3_WriteR7), .RegWriteSelect(pr3_RegWriteSelect), 
@@ -78,7 +78,9 @@ pipeline_reg5 pr5(	.clk(clk), .reset(reset), .toCCR(pr4_CCR), .toCCRWrite(pr4_CC
 write_back stage6(.clk(clk), .reset(clk), .Imm970(pr5_Imm970s), .MemData(pr5_MemData), .PCImmInc(pr5_PCImmInc), .ALUOut(pr5_ALUOut), .PCInc(pr5_PCInc)
 , .regSelect(pr5_RegWriteSelect), .r7Select(pr5_R7WriteSelect), .writeData(writeData), .writeR7Data(writeData));
 
-hazard_detection hdu(.IR_load_mux(IR_load_mux),.new_IR_multi(new_IR_multi),.first_multiple(to_pr1_first_multiple),.clk(clk),.flush_reg_ex(,flush_id_reg,flush_if_id,pr1_IR,pr1_pc,pr2_IR,pr2_pc,pr3_IR,pr4_IR,pc_write,equ);
+hazard_detection hdu(.IR_load_mux(IR_load_mux),.new_IR_multi(new_IR_multi),.first_multiple(to_pr1_first_multiple),.clk(clk),.flush_reg_ex(flush_reg_ex),
+.flush_id_reg(flush_id_reg), .flush_if_id(flush_if_id) ,.pr1_IR(pr1_IR), .pr1_pc(pr1_pc), .pr2_IR(pr2_IR), .pr2_pc(pr2_IR),.pr3_IR(pr3_IR), .pr4_IR(pr4_IR)
+, .pc_write(pc_write),.equ(pr3_Equ));
 endmodule
 
 

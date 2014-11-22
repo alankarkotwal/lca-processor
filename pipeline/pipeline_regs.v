@@ -10,8 +10,11 @@ module pipeline_reg1(clk, reset, toPCInc, toPC, toIR, PCInc, PC, IR,tofirst_mult
 	input  [15:0] toPCInc, toPC, toIR;
 	input	      reset, clk;
 	input tofirst_multiple,flush;
-	assign inIR = (flush==1'b1?{4'b0,toIR[11:0]}:toIR);//introduce a NOP, in the event of a flush
-	register1 pipe1first_multiple(.clk(clk), .out(first_multiple), .in(tofirst_multiple), .write(1'b0), .reset(reset));
+	wire [15:0]inIR;
+	wire infirst_multiple;
+	assign infirst_multiple = (flush==1'b1?1'b0:tofirst_multiple);//introduce a NOP, in the event of a flush
+	assign inIR = (flush==1'b1?{16'b1111000000000000}:toIR);//introduce a NOP, in the event of a flush
+	register1 pipe1first_multiple(.clk(clk), .out(first_multiple), .in(infirst_multiple), .write(1'b0), .reset(reset));
 	register16 pipe1IncPC(.clk(clk), .out(PCInc), .in(toPCInc), .write(1'b0), .reset(reset));
 	register16 pipe1PC(.clk(clk), .out(PC), .in(toPC), .write(1'b0), .reset(reset));
 	register16 pipe1IR(.clk(clk), .out(IR), .in(inIR), .write(1'b0), .reset(reset));
@@ -31,10 +34,10 @@ input [3:0] toMr7WB;
 input [15:0] toPCInc,toPC,toIR,toPCImmInc,toSImm6,toImm970s;
 input flush;
 wire [15:0] inIR;
-wire [15:0]infirst_multiple;
+wire infirst_multiple;
 wire inWriteMem;
 
-assign inIR = (flush==1'b1?{4'b0,toIR[11:0]}:toIR);//introduce a NOP, in the event of a flush
+assign inIR = (flush==1'b1?{16'b1111000000000000}:toIR);//introduce a NOP, in the event of a flush
 assign inWriteMem = (flush==1'b1?1'b1:toWriteMem);//introduce a NOP, in the event of a flush
 assign infirst_multiple = (flush==1'b1?1'b0:tofirst_multiple);//introduce a NOP, in the event of a flush
 register1 Mex1_reg (.clk(clk), .out(Mex1), .in(toMex1) , .write(1'b0), .reset(reset));
@@ -80,23 +83,32 @@ module pipeline_reg3(	clk, reset, toWriteRF, toImm970s, toPCImmInc, toPCInc, toW
 	input [ 1:0] toRegWriteSelect;
 	input        toWriteMem, toRAMemSelectInput, toWAMemSelectInput, toEqu, clk, reset,tofirst_multiple,first_multiple,toMex1,toMex2;
 	
+	wire [15:0] inIR;
+	wire infirst_multiple;
+	wire inWriteMem,inEqu;
+
+	assign inIR = (flush==1'b1?{16'b1111000000000000}:toIR);//introduce a NOP, in the event of a flush
+	assign inWriteMem = (flush==1'b1?1'b1:toWriteMem);//introduce a NOP, in the event of a flush
+	assign inEqu = (flush==1'b1?1'b1:toEqu);//introduce a NOP, in the event of a flush
+	assign infirst_multiple = (flush==1'b1?1'b0:tofirst_multiple);//introduce a NOP, in the event of a flush
+	
 	register16 Imm970Reg(.clk(clk), .out(Imm970s), .in(toImm970s), .write(1'b0), .reset(reset));
 	register16 PCImmIncReg(.clk(clk), .out(PCImmInc), .in(toPCImmInc), .write(1'b0), .reset(reset));
 	register16 PCIncReg(.clk(clk), .out(PCInc), .in(toPCInc), .write(1'b0), .reset(reset));
 	register16 RFOut1Reg(.clk(clk), .out(RFOut1), .in(toRFOut1), .write(1'b0), .reset(reset));
 	register16 RFOut2Reg(.clk(clk), .out(RFOut2), .in(toRFOut2), .write(1'b0), .reset(reset));
 	register16 SImm6Reg(.clk(clk), .out(SImm6), .in(toSImm6), .write(1'b0), .reset(reset));
-	register16 IRReg(.clk(clk), .out(IR), .in(toIR), .write(1'b0), .reset(reset));
+	register16 IRReg(.clk(clk), .out(IR), .in(inIR), .write(1'b0), .reset(reset));
 	register3  WriteAddReg(.clk(clk), .out(WriteAdd), .in(toWriteAdd), .write(1'b0), .reset(reset));
 	register3  R7WriteSelectReg(.clk(clk), .out(R7WriteSelect), .in(toR7WriteSelect), .write(1'b0), .reset(reset));
 	register2  RegWriteSelectReg(.clk(clk), .out(RegWriteSelect), .in(toRegWriteSelect), .write(1'b0), .reset(reset));
 	
-	register1  WriteMemReg(.clk(clk), .out(WriteMem), .in(toWriteMem), .write(1'b0), .reset(reset));
+	register1  WriteMemReg(.clk(clk), .out(WriteMem), .in(inWriteMem), .write(1'b0), .reset(reset));
 	register1  RAMemSelect(.clk(clk), .out(RAMemSelectInput), .in(toRAMemSelectInput), .write(1'b0), .reset(reset));
 	register1  WAMemSelect(.clk(clk), .out(WAMemSelectInput), .in(toWAMemSelectInput), .write(1'b0), .reset(reset));
 	register1  MemdataSelect(.clk(clk), .out(MemdataSelectInput), .in(toMemdataSelectInput), .write(1'b0), .reset(reset));
-	register1  EquReg(.clk(clk), .out(Equ), .in(toEqu), .write(1'b0), .reset(reset));
-	register1 first_multiple_reg (.clk(clk), .out(first_multiple), .in(tofirst_multiple) , .write(1'b0), .reset(reset));
+	register1  EquReg(.clk(clk), .out(Equ), .in(inEqu), .write(1'b0), .reset(reset));
+	register1 first_multiple_reg (.clk(clk), .out(first_multiple), .in(infirst_multiple) , .write(1'b0), .reset(reset));
 	register1 Mex1_reg (.clk(clk), .out(Mex1), .in(toMex1) , .write(1'b0), .reset(reset));
 	register1 Mex2_reg (.clk(clk), .out(Mex2), .in(toMex2) , .write(1'b0), .reset(reset));
 
