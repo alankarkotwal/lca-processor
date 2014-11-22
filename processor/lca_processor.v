@@ -27,32 +27,39 @@ pipeline_reg2 p2(.clk(clk), .reset(reset),.toMex1(to_pr2_Mex1),.Mex1(pr2_Mex1),.
  
 			//from wb
 reg_read stage3(.in(writeData), .readAdd1(pr2_rA1), .readAdd2(pr2_rA2), .regValue1(regValue1), .regValue2(regValue2), .equalValue(equalValue), .write(pr5_WriteRF), 
-.writeAdd(pr5_WriteAdd), .writeR7(pr5_WriteR7), .inR7(writeR7Data), .clk(clk), .reset(reset));
+.writeAdd(pr5_WriteAdd), .writeR7(pr5_WriteR7), .inR7(writeR7Data), .clk(clk), .reset(reset),);
 pipeline_reg3 p3(.clk(clk), .reset(reset), .toalu_ctrl(pr2_alu_ctrl) ,.alu_ctrl(pr3_alu_ctrl),
   .toImm970s(pr2_Imm970), .toPCImmInc(pr2_PCImmInc), .toPCInc(pr2_PCInc), .toWriteAdd(pr2_WriteAdd), .toRegWriteSelect(pr2_MregWB), .toR7WriteSelect(pr2_Mr7WB),
   .toWriteMem(pr2_WriteMem), .toRFOut(regValue1), .toRFOut2(regValue2), .toEqu(equalValue), .toSImm6(pr2_SImm6), .toIR(pr2_IR),
 .WriteRF(pr3_WriteRF), .Imm970s(pr3_Imm970s), .PCImmInc(pr3_PCImmInc), .PCInc(pr3_PCInc), .WriteAdd(pr3_WriteAdd), .WriteR7(pr3_WriteR7), .RegWriteSelect(pr3_RegWriteSelect), 
-.R7WriteSelect(pr3_R7WriteSelect), .WriteMem(pr3_WriteMem), .RFOut1(pr3_RFOut1), .RFOut2(pr3_RFOut2), .Equ(pr3_Equ), .SImm6(pr3_SImm6), .IR(pr3_IR));
+.R7WriteSelect(pr3_R7WriteSelect), .WriteMem(pr3_WriteMem), .RFOut1(pr3_RFOut1), .RFOut2(pr3_RFOut2), .Equ(pr3_Equ), .SImm6(pr3_SImm6), .IR(pr3_IR)
+.MemdataSelectInput(pr3_Mmemdata),.toMemdataSelectInput(pr2_Mmemdata), .RAMemSelectInput(pr3_MmemR),.toRAMemSelectInput(pr2_MmemR), .WAMemSelectInput(pr3_MmemW),
+.toWAMemSelectInput(pr2_MmemW),.tofirst_multiple(pr2_first_multiple), .first_multiple(pr3_first_multiple));
 			
 			
 																							//
-execute stage4(	.clk(clk), .reset(reset), .ALUOut(to_pr4_ALUOut), .ALUOp(pr3_alu_ctrl),.fromPlusOneMem(, fromRFOut1, fromRFOut2, RASelectInput, CCRWrite, CCR_Write_from_wb,CCRWriteValue,CCRWriteValue_from_wb, 
+execute stage4(	.clk(clk), .reset(reset), .ALUOut(to_pr4_ALUOut), .ALUOp(pr3_alu_ctrl),.fromPlusOneMem(RAFromPipeInc), .fromRFOut1(pr3_RFOut1), .fromRFOut2(pr3_RFOut2),
+ .RASelectInput(pr3_first_multiple), .CCRWrite(CCRWrite), .CCR_Write_from_wb(pr5_CCR_Write),.CCRWriteValue(CCRWriteValue),.CCRWriteValue_from_wb(pr5_CCR), 
 fromSImm6, ExMux1Select, ExMux2Select,RAOut, CCR,IR,SignalA,SignalB,SignalC,SignalG,SignalI,SignalJ,SignalK,SignalX,SignalY,
-		mem_wb_op,mem_wb_regA,mem_wb_regB,mem_wb_regC,ex_mem_op,ex_mem_regA,ex_mem_regB,ex_mem_regC,
+		.mem_wb_op({pr5_IR[15:12],pr5_IR[1:0]}), .mem_wb_regA(,mem_wb_regB,mem_wb_regC,ex_mem_op,ex_mem_regA,ex_mem_regB,ex_mem_regC,
 		regread_ex_op,regread_ex_regA,regread_ex_regB,regread_ex_regC,,mem_wb_CCR_write,ex_mem_CCR_write,r7,rf);
 		
-pipeline_reg4 pr4(	clk, reset, toCCR, toCCRWrite, toWriteRF, toImm970s, toPCImmInc, .toALUOut(to_pr4_ALUOut), toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect, toWriteMem, toRFOut, toRAOut,
-			CCR, CCRWrite, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut, RAOut);
+pipeline_reg4 pr4(	clk, reset, toCCR, toCCRWrite(CCRWrite), toWriteRF, toImm970s, toPCImmInc, .toALUOut(to_pr4_ALUOut), toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, 
+toR7WriteSelect, toWriteMem, toRFOut, toRAOut, CCR, .CCRWrite(pr4_CCRWrite), WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut, RAOut);
 			
 			
+			
+			
+			
+
+mem_access stage5(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, RASelectInput, WASelectInput, MemData, DataIn, DataInSelect, WriteMem, .RAFromPipeInc(RAFromPipeInc), SignalC,
+				  Forwarded, F3, Rfout1, Rfout2, mem_wb_CCR_write, ex_mem_CCR_write);			
 pipeline_reg5 pr5(	clk, reset, toCCR, toCCRWrite, toMemData, toWriteRF, toImm970s, toPCImmInc, toALUOut, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect,
-			CCR, CCRWrite, MemData, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect);
+			.CCR(pr5_CCR), .CCRWrite(pr5_CCR_Write), MemData, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect);
 			
 			
 
 
-mem_access stage5(IRfrompipe4, IRfrompipe5, RAFromPipe, ALUOut, RASelectInput, WASelectInput, MemData, DataIn, DataInSelect, WriteMem, RAFromPipeInc, SignalC,
-				  Forwarded, F3, Rfout1, Rfout2, mem_wb_CCR_write, ex_mem_CCR_write);
 write_back stage6(clk, reset, Imm970, MemData, PCImmInc, ALUOut, PCInc, regSelect, r7Select, writeData, writeR7Data);
 
 hazard_detection hdu(IR_load_mux,new_IR_multi,pr1_first_multiple,clk,flush_reg_ex,flush_id_reg,flush_if_id,pr1_IR,pr1_pc,pr2_IR,pr2_pc,pr3_IR,pr4_IR,pc_write,equ);

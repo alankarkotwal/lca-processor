@@ -59,7 +59,8 @@ endmodule
 
 
 module pipeline_reg3(	clk, reset, toWriteRF, toImm970s, toPCImmInc, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect, toWriteMem, toRFOut1,
- toRFOut2, toEqu, toSImm6, toIR,, WriteRF, Imm970s, PCImmInc, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut1, RFOut2, Equ, SImm6, IR);
+ toRFOut2, toEqu, toSImm6, toIR,, WriteRF, Imm970s, PCImmInc, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect, WriteMem, RFOut1, RFOut2, Equ, SImm6, IR,MemdataSelectInput,toMemdataSelectInput,
+ RAMemSelectInput,toRAMemSelectInput, WAMemSelectInput,toWAMemSelectInput,tofirst_multiple,first_multiple);
 	
 	output [15:0] Imm970s, PCImmInc, PCInc, RFOut1, RFOut2, IR, SImm6;
 	output [ 2:0] WriteAdd, R7WriteSelect;
@@ -69,7 +70,7 @@ module pipeline_reg3(	clk, reset, toWriteRF, toImm970s, toPCImmInc, toPCInc, toW
 	input [15:0] toImm970s, toPCImmInc, toPCInc, toRFOut, toRFOut2, toIR, toSImm6;
 	input [ 2:0] toWriteAdd, toR7WriteSelect;
 	input [ 1:0] toRegWriteSelect;
-	input        toWriteMem, toRAMemSelectInput, toWAMemSelectInput, toEqu, clk, reset;
+	input        toWriteMem, toRAMemSelectInput, toWAMemSelectInput, toEqu, clk, reset,tofirst_multiple,first_multiple;
 	
 	register16 Imm970Reg(.clk(clk), .out(Imm970s), .in(toImm970s), .write(1'b0), .reset(reset));
 	register16 PCImmIncReg(.clk(clk), .out(PCImmInc), .in(toPCImmInc), .write(1'b0), .reset(reset));
@@ -85,8 +86,9 @@ module pipeline_reg3(	clk, reset, toWriteRF, toImm970s, toPCImmInc, toPCInc, toW
 	register1  WriteMemReg(.clk(clk), .out(WriteMem), .in(toWriteMem), .write(1'b0), .reset(reset));
 	register1  RAMemSelect(.clk(clk), .out(RAMemSelectInput), .in(toRAMemSelectInput), .write(1'b0), .reset(reset));
 	register1  WAMemSelect(.clk(clk), .out(WAMemSelectInput), .in(toWAMemSelectInput), .write(1'b0), .reset(reset));
+	register1  MemdataSelect(.clk(clk), .out(MemdataSelectInput), .in(toMemdataSelectInput), .write(1'b0), .reset(reset));
 	register1  EquReg(.clk(clk), .out(Equ), .in(toEqu), .write(1'b0), .reset(reset));
-
+	register1 first_multiple_reg (.clk(clk), .out(first_multiple), .in(tofirst_multiple) , .write(1'b0), .reset(reset));
 
 endmodule
 
