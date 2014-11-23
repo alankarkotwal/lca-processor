@@ -14,7 +14,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 	output reg MmemData;
 	integer i;
 	output reg  Mex1, Mex2, wMem, alu_ctrl, MmemR, MmemW;
-	output reg [1:0] Mr7WB;
+	output reg [2:0] Mr7WB;
 	input [15:0] fromPipe1PC, IR;//from pipe1
 	wire [15:0] imm6, imm9;
 	wire select;
@@ -51,7 +51,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[5:3]==3'b111)	//If RC is R7
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
-					Mr7WB<=0;	//Don't Care
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0001:	//ADI
@@ -71,7 +71,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[8:6]==3'b111)	//If RB is R7
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
-					Mr7WB<=0;	//Don't Care	
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0010:	//NDU, NDC, NDZ
@@ -91,7 +91,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[5:3]==3'b111)	//If RC is R7
 					Mr7WB<=3;	//Write back Alu_out to R7
 				else
-					Mr7WB<=0;	//Don't Care	
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0011:	//LHI
@@ -111,7 +111,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[11:9]==3'b111) //If RA is R7
 					Mr7WB<=0;	// Write back Imm970 to R7
 				else
-					Mr7WB<=0;	//Don't Care
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0100:	//LW
@@ -131,7 +131,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[11:9]==3'b111) //If RA is R7
 					Mr7WB<=1;	// Write back mem_data to R7
 				else
-					Mr7WB<=0;	//Don't Care		
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0101:	//SW
@@ -148,7 +148,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				MmemW<=1;	//Write to memory. address in Alu_out
 				MmemData<=0;	//Write to memory. Data present in rfout1
 				MregWB<=0;	//Don't Care
-				Mr7WB<=0;	//Don't Care
+				Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0110:	//LM
@@ -186,7 +186,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				if(IR[11:9]==3'b111) //If RA is R7
 					Mr7WB<=1;	// Write back mem_data to R7
 				else
-					Mr7WB<=0;	//Don't Care
+					Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b0111:	//SM
@@ -220,7 +220,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				MmemW<=0;	//Write to memory. address in RA
 				MmemData<=1;	//Write to memory. data in Rfout2
 				MregWB<=0;	//Don't Care
-				Mr7WB<=0;	//Don't Care
+				Mr7WB<=5;	//PC Increment
 			end
 			
 			4'b1100:	//BEQ
@@ -288,7 +288,7 @@ module decode(MmemData, fromPipe1PC, IR, PC_Imm, rA1, rA2, wA, Sext_Imm6, Imm970
 				MmemW<=0;	//Don't Care
 				MmemData<=0;	//Don't Care
 				MregWB<=0;	
-				Mr7WB<=0;	
+				Mr7WB<=5;	//PC Increment
 			end
 		endcase
 	end

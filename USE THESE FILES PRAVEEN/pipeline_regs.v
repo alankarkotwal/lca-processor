@@ -22,19 +22,21 @@ endmodule
 
 module pipeline_reg2(clk,reset,toMex1,Mex1,toMex2,Mex2,toMmemData,MmemData,toMmemR,MmemR,toMmemW,MmemW,toMregWB,MregWB,toMr7WB,Mr7WB,toPCInc,PCInc,toPC,PC,toIR,IR,tofirst_multiple,
 first_multiple,toPCImmInc,PCImmInc,toWriteMem,WriteMem,torA1,rA1,torA2,rA2,toWriteAdd,WriteAdd,toSImm6,SImm6,toImm970s,Imm970s,toalu_ctrl,alu_ctrl,flush,modify_pr2_ra,modify_ir);
-output Mex1,Mex2,MmemData,MmemR,MmemW,first_multiple,WriteMem,alu_ctrl;
-output [2:0] rA1,rA2,WriteAdd;
-output [1:0] Mr7WB,MregWB;
-output [15:0] PCInc,PC,IR,PCImmInc,SImm6,Imm970s;
-input toMex1,toMex2,toMmemData,toMmemR,toMmemW,tofirst_multiple,toWriteMem,toalu_ctrl;
-input [2:0] torA1,torA2,toWriteAdd,modify_pr2_ra;
-input modify_ir;
-input [1:0] toMr7WB,toMregWB;
-input [15:0] toPCInc,toPC,toIR,toPCImmInc,toSImm6,toImm970s;
-input flush,clk,reset;
-wire [15:0] inIR;
-wire infirst_multiple;
-wire inWriteMem;
+	output Mex1,Mex2,MmemData,MmemR,MmemW,first_multiple,WriteMem,alu_ctrl;
+	output [2:0] rA1,rA2,WriteAdd;
+	output [2:0] Mr7WB;
+	output [1:0] MregWB;
+	output [15:0] PCInc,PC,IR,PCImmInc,SImm6,Imm970s;
+	input toMex1,toMex2,toMmemData,toMmemR,toMmemW,tofirst_multiple,toWriteMem,toalu_ctrl;
+	input [2:0] torA1,torA2,toWriteAdd,modify_pr2_ra;
+	input  modify_ir;
+	input [2:0] toMr7WB;
+	input [1:0] toMregWB;
+	input [15:0] toPCInc,toPC,toIR,toPCImmInc,toSImm6,toImm970s;
+	input flush,clk,reset;
+	wire [15:0] inIR;
+	wire infirst_multiple;
+	wire inWriteMem;
 
 assign inIR = (flush==1'b1)?16'b1111000000000000:
 					((modify_ir ==1'b1)?{toIR[15:12],modify_pr2_ra,toIR[8:0]}:toIR);//introduce a NOP, in the event of a flush
@@ -75,12 +77,13 @@ module pipeline_reg3(clk, reset, toalu_ctrl, alu_ctrl, toImm970s, toPCImmInc, to
 	
 	output [15:0] Imm970s, PCImmInc, PCInc, RFOut1, RFOut2, IR, SImm6;
 	output [ 2:0] WriteAdd;
-	output [1:0]  R7WriteSelect, RegWriteSelect;
+	output [2:0]  R7WriteSelect;
+	output [1:0] RegWriteSelect;
 	output        WriteMem, RAMemSelectInput, WAMemSelectInput, Equ,Mex1,Mex2, alu_ctrl, MemdataSelectInput,first_multiple;
 	
 	input [15:0] toImm970s, toPCImmInc, toPCInc, toRFOut1, toRFOut2, toIR, toSImm6;
 	input [ 2:0] toWriteAdd;
-	input [1:0]  toR7WriteSelect;
+	input [2:0]  toR7WriteSelect;
 	input [ 1:0] toRegWriteSelect;
 	input        toWriteMem, toRAMemSelectInput, toWAMemSelectInput, toEqu, clk, reset,tofirst_multiple,toMex1,toMex2, flush,
 				 toalu_ctrl, toMemdataSelectInput;
@@ -124,13 +127,14 @@ module pipeline_reg4(	clk, reset, toCCR, toCCRWrite, toWriteRF, toImm970s, toPCI
 	toWAMemSelectInput);
 
 	output [15:0] Imm970s, PCImmInc, ALUOut, PCInc, RFOut1, RFOut2, RAOut,IR;
-	output [ 2:0] WriteAdd;
-	output [1:0] R7WriteSelect, CCR, RegWriteSelect;
+	output [2:0]  WriteAdd;
+	output [2:0] R7WriteSelect;
+	output [1:0] CCR, RegWriteSelect;
 	output        CCRWrite, WriteRF, WriteR7, WriteMem, RAMemSelectInput, WAMemSelectInput, MemdataSelectInput;
 	
 	input [15:0] toImm970s, toPCImmInc, toALUOut, toPCInc, toRFOut1, toRFOut1, toRFOut2, toRAOut,toIR;
 	input [ 2:0] toWriteAdd;
-	output [1:0] toR7WriteSelect;
+	output [2:0] toR7WriteSelect;
 	input [ 1:0] toCCR, toRegWriteSelect;
 	input        toCCRWrite, toWriteRF, toWriteR7, toWriteMem, toRAMemSelectInput, toWAMemSelectInput, clk, reset, toMemdataSelectInput;
 
@@ -162,17 +166,18 @@ endmodule
 
 
 module pipeline_reg5(	clk, reset, toCCR, toCCRWrite, toMemData, toWriteRF, toImm970s, toPCImmInc, toALUOut, toPCInc, toWriteAdd, toWriteR7, toRegWriteSelect, toR7WriteSelect,
-			CCR, CCRWrite, MemData, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect,toIR,IR);
+			CCR, CCRWrite, MemData, WriteRF, Imm970s, PCImmInc, ALUOut, PCInc, WriteAdd, WriteR7, RegWriteSelect, R7WriteSelect,toIR,IR,
+			RFOut2, toRFOut2);
 			
-	output [15:0] MemData, Imm970s, PCImmInc, ALUOut, PCInc,IR;
+	output [15:0] MemData, Imm970s, PCImmInc, ALUOut, PCInc,IR, RFOut2;
 	output [ 2:0] WriteAdd;
-	output [1:0] R7WriteSelect;
+	output [2:0] R7WriteSelect;
 	output [ 1:0] CCR, RegWriteSelect;
 	output        CCRWrite, WriteRF, WriteR7;
 	
-	input [15:0] toMemData, toImm970s, toPCImmInc, toALUOut, toPCInc,toIR;
+	input [15:0] toMemData, toImm970s, toPCImmInc, toALUOut, toPCInc,toIR, toRFOut2;
 	input [ 2:0] toWriteAdd;
-	input [1:0] toR7WriteSelect;
+	input [2:0] toR7WriteSelect;
 	input [ 1:0] toCCR, toRegWriteSelect;
 	input        toCCRWrite, toWriteRF, toWriteR7, clk, reset;
 	
@@ -182,6 +187,7 @@ module pipeline_reg5(	clk, reset, toCCR, toCCRWrite, toMemData, toWriteRF, toImm
 	register16 ALUOutReg(.clk(clk), .out(ALUOut), .in(toALUOut), .write(1'b0), .reset(reset));
 	register16 PCIncReg(.clk(clk), .out(PCInc), .in(toPCInc), .write(1'b0), .reset(reset));
 	register16 IR_Reg(.clk(clk), .out(IR), .in(toIR), .write(1'b0), .reset(reset));
+	register16 RFOut2_Reg(.clk(clk), .out(RFOut2), .in(toRFOut2), .write(1'b0), .reset(reset));
 	
 	register3  WriteAddReg(.clk(clk), .out(WriteAdd), .in(toWriteAdd), .write(1'b0), .reset(reset));
 	register2  R7WriteSelectReg(.clk(clk), .out(R7WriteSelect), .in(toR7WriteSelect), .write(1'b0), .reset(reset));
