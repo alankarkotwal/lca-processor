@@ -1,6 +1,3 @@
-`ifndef _INSTR_MEM
-`define _INSTR_MEM
-
 module instr_mem(readAdd, out);
 
 	output [15:0] out;
@@ -21,5 +18,3 @@ module instr_mem(readAdd, out);
 	end
 
 endmodule
-
-`endif
